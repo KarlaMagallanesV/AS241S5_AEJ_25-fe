@@ -1,0 +1,190 @@
+<div class="page">
+    <div class="page-header">
+        <img src="youtube.png" alt="YouTube" class="page-icon" />
+        <h1>YouTube</h1>
+        <span class="count">{{ activeItems.length }} registros</span>
+        @if (deletedItems.length > 0) {
+        <button class="btn-trash-toggle" (click)="showDeleted.set(!showDeleted())" [class.active]="showDeleted()">
+            🗑️ Papelera ({{ deletedItems.length }})
+        </button>
+        }
+    </div>
+
+    <!-- Barra de descarga -->
+    <div class="download-bar">
+        <img src="youtube.png" alt="YouTube" class="download-bar-icon" />
+        <input class="download-input" type="text" [(ngModel)]="downloadInput"
+            placeholder="Ingresar enlace o ID del video de YouTube…" (keydown.enter)="onDownload()"
+            [disabled]="downloading()" aria-label="Enlace o ID del video" />
+        <button class="download-btn" (click)="onDownload()" [disabled]="downloading()">
+            @if (downloading()) {
+            <span class="spinner"></span> Procesando…
+            } @else {
+            <img src="descargar.png" alt="Descargar" class="btn-icon-img" /> Descargar
+            }
+        </button>
+    </div>
+
+    @if (loading()) {
+    <div class="state-msg">Cargando...</div>
+    } @else if (error()) {
+    <div class="state-msg error">{{ error() }}</div>
+    } @else if (activeItems.length === 0 && !showDeleted()) {
+    <div class="state-msg">No hay descargas aún.</div>
+    } @else {
+
+    <div class="grid">
+        @for (item of activeItems; track item.id) {
+        <div class="card">
+
+            <!-- Header estilo Instagram -->
+            <div class="card-header">
+                <div class="avatar-ring">
+                    <div class="avatar-inner">
+                        @if (item.thumbnail) {
+                        <img [src]="item.thumbnail" [alt]="item.title" />
+                        } @else {
+                        <img src="youtube.png" alt="yt" />
+                        }
+                    </div>
+                </div>
+                <div class="card-header-info">
+                    <p class="header-title">{{ item.title || 'Sin título' }}</p>
+                    <p class="header-sub">{{ item.videoId }}</p>
+                </div>
+                <div class="card-menu">
+                    @if (item.favorite) {
+                    <span class="badge-fav">★</span>
+                    }
+                    <button (click)="openEdit(item)" aria-label="Editar">✏️</button>
+                    <button class="delete-btn" (click)="openDelete(item)" aria-label="Eliminar">🗑️</button>
+                </div>
+            </div>
+
+            <!-- Thumbnail 16:9 -->
+            <div class="card-cover">
+                @if (item.thumbnail) {
+                <img [src]="item.thumbnail" [alt]="item.title" />
+                } @else {
+                <div class="cover-placeholder">
+                    <img src="youtube.png" alt="yt" />
+                </div>
+                }
+                <div class="status-overlay">
+                    <span class="status-badge" [class]="statusClass(item.status)">
+                        {{ item.status || 'PENDIENTE' }}
+                    </span>
+                </div>
+                @if (item.duration) {
+                <span class="duration-badge">{{ formatDuration(item.duration) }}</span>
+                }
+            </div>
+
+            <!-- Barra de progreso bajo la imagen -->
+            @if (item.progress > 0) {
+            <div class="cover-progress">
+                <div class="cover-progress-fill" [style.width.%]="item.progress"></div>
+            </div>
+            }
+
+            <!-- Acciones estilo Instagram -->
+            <div class="card-actions">
+                <button class="action-btn" aria-label="Favorito">
+                    {{ item.favorite ? '❤️' : '🤍' }}
+                </button>
+                <a [href]="item.link" target="_blank" class="action-btn icon-btn" aria-label="Ver video">
+                    <img src="boton-de-play.png" alt="Play" />
+                </a>
+                <div class="spacer"></div>
+                <button class="action-btn" aria-label="Guardar">🔖</button>
+            </div>
+
+            <!-- Cuerpo -->
+            <div class="card-body">
+                <p class="card-caption">
+                    <span class="caption-user">{{ item.title || 'Sin título' }}</span>
+                    <a [href]="item.link" target="_blank" class="caption-link">
+                        {{ item.link | slice:0:35 }}…
+                    </a>
+                </p>
+                <div class="card-meta-row">
+                    <span>📊 {{ item.progress }}%</span>
+                    @if (item.msg) {
+                    <span>💬 {{ item.msg }}</span>
+                    }
+                </div>
+                <p class="card-date">{{ item.createdAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+            </div>
+
+        </div>
+        }
+    </div>
+
+    <!-- Papelera -->
+    @if (showDeleted() && deletedItems.length > 0) {
+    <div class="trash-section">
+        <h2 class="trash-title">🗑️ Papelera</h2>
+        <div class="grid">
+            @for (item of deletedItems; track item.id) {
+            <div class="card card-deleted">
+
+                <div class="card-header">
+                    <div class="avatar-ring">
+                        <div class="avatar-inner">
+                            @if (item.thumbnail) {
+                            <img [src]="item.thumbnail" [alt]="item.title" />
+                            } @else {
+                            <img src="youtube.png" alt="yt" />
+                            }
+                        </div>
+                    </div>
+                    <div class="card-header-info">
+                        <p class="header-title">{{ item.title || 'Sin título' }}</p>
+                        <p class="header-sub">{{ item.videoId }}</p>
+                    </div>
+                    <div class="card-menu">
+                        <span class="badge-deleted">Eliminado</span>
+                        <button (click)="openTrash(item)" aria-label="Opciones papelera">•••</button>
+                    </div>
+                </div>
+
+                <div class="card-cover">
+                    @if (item.thumbnail) {
+                    <img [src]="item.thumbnail" [alt]="item.title" />
+                    } @else {
+                    <div class="cover-placeholder">
+                        <img src="youtube.png" alt="yt" />
+                    </div>
+                    }
+                </div>
+
+                <div class="card-body">
+                    @if (item.deletedAt) {
+                    <p class="card-date">Eliminado: {{ item.deletedAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+                    }
+                    <p class="card-date">Creado: {{ item.createdAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+                </div>
+
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    }
+</div>
+
+@if (editTarget()) {
+<app-edit-modal [title]="editTarget()!.title || editTarget()!.videoId" [favorite]="editTarget()!.favorite"
+    (save)="onSaveFavorite($event)" (cancel)="editTarget.set(null)" />
+}
+
+@if (deleteTarget()) {
+<app-delete-modal [title]="deleteTarget()!.title || deleteTarget()!.videoId" (confirm)="onConfirmDelete()"
+    (cancel)="deleteTarget.set(null)" />
+}
+
+@if (trashTarget()) {
+<app-trash-modal [title]="trashTarget()!.title || trashTarget()!.videoId" (restore)="onConfirmRestore()"
+    (deletePermanent)="onConfirmDeletePermanent()" (cancel)="trashTarget.set(null)" />
+}

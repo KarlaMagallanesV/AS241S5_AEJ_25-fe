@@ -1,0 +1,33 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="campana.png" alt="PawLoad logo" class="brand-logo" />
+      <span class="brand-name">PawLoad</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="nav-label">Navegación</p>
+
+      <a routerLink="/youtube" routerLinkActive="active" class="nav-item">
+        <img src="youtube.png" alt="YouTube" class="nav-icon" />
+        <span>YouTube</span>
+      </a>
+
+      <a routerLink="/spotify" routerLinkActive="active" class="nav-item">
+        <img src="spotify.png" alt="Spotify" class="nav-icon" />
+        <span>Spotify</span>
+      </a>
+
+      <a routerLink="/emergencia" routerLinkActive="active" class="nav-item">
+        <img src="veterinario.png" alt="Emergencia" class="nav-icon" />
+        <span>Emergencia</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>
+
+<app-toast />

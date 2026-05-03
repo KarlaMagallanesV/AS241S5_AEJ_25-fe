@@ -1,0 +1,23 @@
+<div class="modal-backdrop" (click)="cancel.emit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-icon">✏️</span>
+            <h2>Editar registro</h2>
+        </div>
+
+        <p class="modal-subtitle">{{ title }}</p>
+
+        <div class="favorite-row">
+            <span class="fav-label">Marcar como favorito</span>
+            <button class="fav-btn" [class.active]="current" (click)="toggle()"
+                [attr.aria-label]="current ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+                {{ current ? '★' : '☆' }}
+            </button>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="cancel.emit()">Cancelar</button>
+            <button class="btn-save" (click)="onSave()">Agregar</button>
+        </div>
+    </div>
+</div>

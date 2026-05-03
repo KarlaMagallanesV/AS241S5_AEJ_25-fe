@@ -1,0 +1,21 @@
+<div class="modal-backdrop" (click)="cancel.emit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <span class="modal-icon">🗑️</span>
+            <h2>En papelera</h2>
+        </div>
+
+        <p class="modal-body">
+            <strong>"{{ title }}"</strong> está en la papelera. ¿Desea Restaurarlo?
+        </p>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="cancel.emit()">Cancelar</button>
+            <button class="btn-restore" (click)="restore.emit()">
+                ♻️ Restaurar
+            </button>
+        </div>
+
+    </div>
+</div>
