@@ -1,0 +1,136 @@
+name: Integración Continua + Notificaciones Discord — AS241S5_AEJ_25-fe
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - develop
+
+concurrency:
+  group: ci-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # Build, Test y Empaquetamiento del Frontend
+  frontend:
+    name: AS241S5_AEJ_25-fe
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Instalar dependencias
+        run: bun install
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Tests
+        run: bun run test
+
+      - name: Build de producción
+        run: bun run build
+
+  # Notificación Discord: éxito
+  notify-success:
+    name: Notificar Discord — Éxito
+    needs: [frontend]
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Enviar notificación de éxito a Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          embed-title: "✅ Pipeline exitoso — AS241S5_AEJ_25-fe"
+          embed-description: |
+            **Repositorio:** ${{ github.repository }}
+            **Branch:** `${{ github.ref_name }}`
+            **Evento:** `${{ github.event_name }}`
+            **Commit:** `${{ github.sha }}`
+            **Autor:** ${{ github.actor }}
+            **Mensaje:** ${{ github.event.head_commit.message }}
+          embed-color: 16765404
+          embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          embed-author-name: "Karla Anyeli Magallanes Vicente"
+          embed-footer-text: "Frontend Angular — OK"
+
+  # Notificación Discord: fallo
+  notify-failure:
+    name: Notificar Discord — Fallo
+    needs: [frontend]
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Enviar notificación de fallo a Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          embed-title: "❌ Pipeline fallido — AS241S5_AEJ_25-fe"
+          embed-description: |
+            **Repositorio:** ${{ github.repository }}
+            **Branch:** `${{ github.ref_name }}`
+            **Evento:** `${{ github.event_name }}`
+            **Commit:** `${{ github.sha }}`
+            **Autor:** ${{ github.actor }}
+            **Mensaje:** ${{ github.event.head_commit.message }}
+
+            > Revisa los logs del run para ver qué falló.
+          embed-color: 15158332
+          embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          embed-author-name: "Karla Anyeli Magallanes Vicente"
+          embed-footer-text: "Revisa los logs del Frontend Angular"
+
+  # Notificación Discord: Pull Request
+  notify-pr:
+    name: Notificar Discord — Evento PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Determinar color y estado del PR
+        id: pr-info
+        run: |
+          if [ "${{ github.event.action }}" == "closed" ] && [ "${{ github.event.pull_request.merged }}" == "true" ]; then
+            echo "color=7506394"   >> $GITHUB_OUTPUT
+            echo "status=Mergeado" >> $GITHUB_OUTPUT
+            echo "icon=🔀"         >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.action }}" == "closed" ]; then
+            echo "color=15158332"  >> $GITHUB_OUTPUT
+            echo "status=Cerrado"  >> $GITHUB_OUTPUT
+            echo "icon=🚫"         >> $GITHUB_OUTPUT
+          else
+            echo "color=3447003"   >> $GITHUB_OUTPUT
+            echo "status=Abierto"  >> $GITHUB_OUTPUT
+            echo "icon=🔔"         >> $GITHUB_OUTPUT
+          fi
+
+      - name: Enviar notificación de Pull Request a Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          embed-title: "${{ steps.pr-info.outputs.icon }} PR ${{ steps.pr-info.outputs.status }} — #${{ github.event.pull_request.number }}"
+          embed-description: |
+            **${{ github.event.pull_request.title }}**
+
+            **Repo:** ${{ github.repository }}
+            **Base:** `${{ github.event.pull_request.base.ref }}` ← `${{ github.event.pull_request.head.ref }}`
+            **Autor:** ${{ github.event.pull_request.user.login }}
+            **Commits:** ${{ github.event.pull_request.commits }}
+            **Archivos:** ${{ github.event.pull_request.changed_files }} archivos modificados
+          embed-color: ${{ steps.pr-info.outputs.color }}
+          embed-url: ${{ github.event.pull_request.html_url }}
+          embed-author-name: "Karla Anyeli Magallanes Vicente"
+          embed-footer-text: "AS241S5_AEJ_25-fe"
