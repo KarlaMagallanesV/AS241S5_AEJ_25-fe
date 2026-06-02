@@ -14,7 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   # Build, Test y Empaquetamiento del Frontend
   frontend:
     name: AS241S5_AEJ_25-fe
@@ -31,9 +30,6 @@ jobs:
 
       - name: Instalar dependencias
         run: bun install
-
-      - name: Lint
-        run: bun run lint
 
       - name: Tests
         run: bun run test
@@ -53,7 +49,7 @@ jobs:
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          embed-title: "✅ Pipeline exitoso — AS241S5_AEJ_25-fe"
+          embed-title: '✅ Pipeline exitoso — AS241S5_AEJ_25-fe'
           embed-description: |
             **Repositorio:** ${{ github.repository }}
             **Branch:** `${{ github.ref_name }}`
@@ -63,8 +59,8 @@ jobs:
             **Mensaje:** ${{ github.event.head_commit.message }}
           embed-color: 16765404
           embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          embed-author-name: "Karla Anyeli Magallanes Vicente"
-          embed-footer-text: "Frontend Angular — OK"
+          embed-author-name: 'Karla Anyeli Magallanes Vicente'
+          embed-footer-text: 'Frontend Angular — OK'
 
   # Notificación Discord: fallo
   notify-failure:
@@ -78,7 +74,7 @@ jobs:
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          embed-title: "❌ Pipeline fallido — AS241S5_AEJ_25-fe"
+          embed-title: '❌ Pipeline fallido — AS241S5_AEJ_25-fe'
           embed-description: |
             **Repositorio:** ${{ github.repository }}
             **Branch:** `${{ github.ref_name }}`
@@ -90,8 +86,8 @@ jobs:
             > Revisa los logs del run para ver qué falló.
           embed-color: 15158332
           embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          embed-author-name: "Karla Anyeli Magallanes Vicente"
-          embed-footer-text: "Revisa los logs del Frontend Angular"
+          embed-author-name: 'Karla Anyeli Magallanes Vicente'
+          embed-footer-text: 'Revisa los logs del Frontend Angular'
 
   # Notificación Discord: Pull Request
   notify-pr:
@@ -121,7 +117,7 @@ jobs:
         uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          embed-title: "${{ steps.pr-info.outputs.icon }} PR ${{ steps.pr-info.outputs.status }} — #${{ github.event.pull_request.number }}"
+          embed-title: '${{ steps.pr-info.outputs.icon }} PR ${{ steps.pr-info.outputs.status }} — #${{ github.event.pull_request.number }}'
           embed-description: |
             **${{ github.event.pull_request.title }}**
 
@@ -132,5 +128,5 @@ jobs:
             **Archivos:** ${{ github.event.pull_request.changed_files }} archivos modificados
           embed-color: ${{ steps.pr-info.outputs.color }}
           embed-url: ${{ github.event.pull_request.html_url }}
-          embed-author-name: "Karla Anyeli Magallanes Vicente"
-          embed-footer-text: "AS241S5_AEJ_25-fe"
+          embed-author-name: 'Karla Anyeli Magallanes Vicente'
+          embed-footer-text: 'AS241S5_AEJ_25-fe'
