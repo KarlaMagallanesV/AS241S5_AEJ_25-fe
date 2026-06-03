@@ -1,0 +1,129 @@
+.layout {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97) 0%, rgba(222, 235, 224, 0.95) 100%);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.6),
+    2px 0 20px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  gap: 1.5rem;
+  position: relative;
+
+  /* gloss sheen */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 55%);
+    pointer-events: none;
+  }
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.25rem;
+
+  .brand-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  .brand-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+  }
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nav-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  padding: 0 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    opacity: 0.7;
+  }
+
+  &:hover:not(.disabled) {
+    background: var(--color-pink-light);
+    color: var(--color-text);
+
+    .nav-icon {
+      opacity: 1;
+    }
+  }
+
+  /* efecto hundido al estar activo */
+  &.active {
+    background: rgba(107, 143, 113, 0.18);
+    color: var(--color-sage-dark);
+    font-weight: 600;
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.14),
+      inset 0 1px 2px rgba(0, 0, 0, 0.09);
+    transform: translateY(1px);
+
+    .nav-icon {
+      opacity: 1;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+/* ── Main content ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--color-bg);
+  height: 100dvh;
+}

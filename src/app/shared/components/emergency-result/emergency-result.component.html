@@ -1,0 +1,90 @@
+@if (parsed) {
+<div class="er-card">
+
+    <!-- Top: tipo + severidad -->
+    <div class="er-header">
+        <div class="er-title-group">
+            <span class="er-icon">🚨</span>
+            <div>
+                <h3 class="er-type">{{ parsed.result.emergencyType }}</h3>
+                <p class="er-message">{{ parsed.message }}</p>
+            </div>
+        </div>
+        <span class="severity-badge" [class]="severityClass(parsed.result.severityLevel)">
+            {{ parsed.result.severityLevel }}
+        </span>
+    </div>
+
+    <!-- Acciones inmediatas -->
+    <div class="er-section">
+        <h4 class="er-section-title">⚡ Acciones inmediatas</h4>
+        <div class="steps-list">
+            @for (action of parsed.result.immediateActions; track action.step) {
+            <div class="step-item">
+                <span class="step-number">{{ action.step }}</span>
+                <div class="step-content">
+                    <p class="step-action">{{ action.action }}</p>
+                    <span class="step-duration">⏱ {{ action.duration }}</span>
+                    @if (action.warning) {
+                    <div class="step-warning">⚠️ {{ action.warning }}</div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- No hacer -->
+    <div class="er-section">
+        <h4 class="er-section-title">🚫 No hacer</h4>
+        <div class="bubble-list">
+            @for (item of parsed.result.doNotDo; track item) {
+            <span class="bubble bubble-red">{{ item }}</span>
+            }
+        </div>
+    </div>
+
+    <!-- Señales de deterioro -->
+    <div class="er-section">
+        <h4 class="er-section-title">⚠️ Señales de deterioro</h4>
+        <div class="bubble-list">
+            @for (sign of parsed.result.signsOfDeteriorating; track sign) {
+            <span class="bubble bubble-orange">{{ sign }}</span>
+            }
+        </div>
+    </div>
+
+    <!-- Cuándo ir de urgencia -->
+    <div class="er-alert">
+        <span class="er-alert-icon">🏥</span>
+        <p>{{ parsed.result.whenToRush }}</p>
+    </div>
+
+    <!-- Tips de transporte -->
+    <div class="er-section">
+        <h4 class="er-section-title">🚗 Consejos de traslado</h4>
+        <div class="bubble-list">
+            @for (tip of parsed.result.transportationTips; track tip) {
+            <span class="bubble bubble-sage">{{ tip }}</span>
+            }
+        </div>
+    </div>
+
+    <!-- Mantén la calma -->
+    <div class="er-calm">
+        <span>💚</span>
+        <p>{{ parsed.result.stayCalm }}</p>
+    </div>
+
+    <!-- Contactos -->
+    <div class="er-section">
+        <h4 class="er-section-title">📞 Contactos de emergencia</h4>
+        <p class="er-contact">{{ parsed.result.emergencyContacts.recommendation }}</p>
+        <p class="er-contact muted">{{ parsed.result.emergencyContacts.poisonControl }}</p>
+    </div>
+
+    <!-- Disclaimer -->
+    <p class="er-disclaimer">{{ parsed.result.disclaimer }}</p>
+
+</div>
+}

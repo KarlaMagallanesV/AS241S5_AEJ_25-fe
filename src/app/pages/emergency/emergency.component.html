@@ -1,0 +1,165 @@
+<div class="page">
+    <div class="page-main">
+
+        <!-- Header -->
+        <div class="page-header">
+            <img src="veterinario.png" alt="Emergencia" class="page-icon" />
+            <h1>Emergencia Veterinaria</h1>
+            <span class="count">{{ activeRecords.length }} análisis</span>
+            @if (deletedRecords.length > 0) {
+            <button class="btn-trash-toggle" (click)="showDeleted.set(!showDeleted())" [class.active]="showDeleted()">
+                🗑️ Papelera ({{ deletedRecords.length }})
+            </button>
+            }
+        </div>
+
+        <!-- Formulario de análisis -->
+        <div class="analyze-card">
+            <div class="analyze-card-header">
+                <span class="analyze-icon">🚨</span>
+                <div>
+                    <h2>Nueva consulta de emergencia</h2>
+                    <p>Describe la situación y obtén pautas de acción inmediata</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Tipo de mascota -->
+                <div class="form-group">
+                    <label class="form-label">Tipo de mascota</label>
+                    <div class="pet-selector">
+                        @for (pet of petTypes; track pet) {
+                        <button class="pet-btn" [class.active]="form.petType === pet" (click)="form.petType = pet">
+                            {{ pet }}
+                        </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Idioma -->
+                <div class="form-group">
+                    <label class="form-label">Idioma de respuesta</label>
+                    <div class="lang-selector">
+                        @for (lang of languages; track lang.code) {
+                        <button class="lang-btn" [class.active]="form.language === lang.code"
+                            (click)="form.language = lang.code">
+                            {{ lang.label }}
+                        </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción de emergencia -->
+            <div class="form-group">
+                <label class="form-label">Describe la emergencia</label>
+                <textarea class="emergency-input" [(ngModel)]="form.emergency" rows="4"
+                    placeholder="Ej: Mi perro ingirió chocolate hace 30 minutos, está vomitando y tiembla…"
+                    [disabled]="analyzing()"></textarea>
+            </div>
+
+            <button class="btn-analyze" (click)="onAnalyze()" [disabled]="analyzing()">
+                @if (analyzing()) {
+                <span class="spinner"></span> Analizando…
+                } @else {
+                🔍 Analizar emergencia
+                }
+            </button>
+        </div>
+
+        <!-- Resultado del último análisis -->
+        @if (lastResult()) {
+        <div class="result-card">
+            <div class="result-header">
+                <span>✅</span>
+                <h3>Resultado del análisis</h3>
+            </div>
+            <div class="result-body">
+                <app-emergency-result [raw]="lastResult()" />
+            </div>
+        </div>
+        }
+
+        <!-- Historial -->
+        <div class="section-title">
+            <h2>📋 Historial médico</h2>
+        </div>
+
+        @if (loading()) {
+        <div class="state-msg">Cargando historial...</div>
+        } @else if (activeRecords.length === 0 && !showDeleted()) {
+        <div class="state-msg">No hay análisis registrados aún.</div>
+        } @else {
+
+        <div class="history-list">
+            @for (record of activeRecords; track record.id) {
+            <div class="history-card" [class.expanded]="expandedId() === record.id">
+
+                <div class="history-card-main" (click)="toggleExpand(record.id)">
+                    <div class="history-avatar">
+                        <img src="veterinario.png" alt="mascota" />
+                    </div>
+                    <div class="history-info">
+                        <div class="history-top">
+                            <span class="pet-badge">{{ record.petType }}</span>
+                            <span class="lang-badge">{{ languageLabel(record.language) }}</span>
+                        </div>
+                        <p class="history-emergency">{{ record.emergency }}</p>
+                        <p class="history-date">{{ record.createdAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+                    </div>
+                    <div class="history-actions" (click)="$event.stopPropagation()">
+                        <button class="btn-icon delete-btn" (click)="onSoftDelete(record)"
+                            aria-label="Eliminar">🗑️</button>
+                    </div>
+                    <span class="expand-arrow">{{ expandedId() === record.id ? '▲' : '▼' }}</span>
+                </div>
+
+                @if (expandedId() === record.id) {
+                <div class="history-result">
+                    <app-emergency-result [raw]="record.analysisResult" />
+                </div>
+                }
+
+            </div>
+            }
+        </div>
+
+        <!-- Papelera -->
+        @if (showDeleted() && deletedRecords.length > 0) {
+        <div class="trash-section">
+            <h2 class="trash-title">🗑️ Papelera</h2>
+            <div class="history-list">
+                @for (record of deletedRecords; track record.id) {
+                <div class="history-card card-deleted">
+                    <div class="history-card-main">
+                        <div class="history-avatar">
+                            <img src="veterinario.png" alt="mascota" />
+                        </div>
+                        <div class="history-info">
+                            <div class="history-top">
+                                <span class="pet-badge">{{ record.petType }}</span>
+                                <span class="badge-deleted">Eliminado</span>
+                            </div>
+                            <p class="history-emergency">{{ record.emergency }}</p>
+                            <p class="history-date">{{ record.createdAt | date:'dd/MM/yyyy · HH:mm' }}</p>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn-icon" (click)="openTrash(record)" aria-label="Opciones">•••</button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        }
+
+    </div><!-- /page-main -->
+
+</div><!-- /page -->
+
+@if (trashTarget()) {
+<app-trash-modal [title]="trashTarget()!.petType + ' — ' + (trashTarget()!.emergency | slice:0:40)"
+    (restore)="onConfirmRestore()" (deletePermanent)="onConfirmDeletePermanent()" (cancel)="trashTarget.set(null)" />
+}
